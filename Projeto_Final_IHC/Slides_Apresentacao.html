@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stylo · Avaliação de Usabilidade — Apresentação IHC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A1714; --soft:#3E382F; --cream:#F6F1E9; --paper:#FBF8F2;
+    --clay:#C2603F; --clayd:#A84E30; --clayl:#E7C4B2; --sage:#7C8A6B; --saged:#5F6B50;
+    --sand:#E4D7BE; --line:#E3D8C4; --grey:#8C8276;
+    font-family:'Hanken Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#0e0c0a;color:var(--ink);overflow:hidden}
+  .serif{font-family:'Fraunces',Georgia,serif}
+
+  .deck{height:100vh;width:100vw;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;
+    padding:64px 84px;background:var(--paper);opacity:0;transition:opacity .45s ease}
+  .slide.active{display:flex;opacity:1;animation:in .5s ease both}
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* paper texture / atmosphere */
+  .slide::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(70% 55% at 88% 8%,rgba(194,96,63,.07),transparent 60%),
+               radial-gradient(55% 45% at 6% 96%,rgba(124,138,107,.08),transparent 60%);}
+  .slide>*{position:relative;z-index:1}
+
+  .kicker{font-size:14px;letter-spacing:.22em;text-transform:uppercase;color:var(--clayd);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  .kicker .dot{width:9px;height:9px;border-radius:50%;background:var(--clay)}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:62px;line-height:1.02;letter-spacing:-.02em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:42px;line-height:1.05;letter-spacing:-.015em;margin-bottom:6px}
+  h2 em{font-style:italic;color:var(--clayd)}
+  .lead{font-size:22px;color:var(--soft);max-width:60ch;line-height:1.5;margin-top:10px}
+  p{font-size:20px;line-height:1.55;color:var(--soft)}
+
+  /* footer / chrome */
+  .chrome{position:fixed;bottom:0;left:0;right:0;height:44px;display:flex;align-items:center;
+    gap:16px;padding:0 22px;color:#cabfae;font-size:12.5px;z-index:30}
+  .chrome .brand{font-family:'Fraunces',serif;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px}
+  .chrome .brand .d{width:7px;height:7px;border-radius:50%;background:var(--clay)}
+  .chrome .who{margin-left:auto;color:#9c9384}
+  .progress{position:fixed;top:0;left:0;height:4px;background:var(--clay);z-index:40;transition:width .35s ease}
+  .pager{position:fixed;bottom:46px;right:22px;z-index:35;display:flex;gap:8px}
+  .pager button{width:40px;height:40px;border-radius:11px;border:1px solid #2c2620;background:#161310;color:#cabfae;font-size:17px;cursor:pointer;transition:.15s}
+  .pager button:hover{background:var(--clay);color:#fff;border-color:var(--clay)}
+  .counter{position:fixed;bottom:54px;right:118px;z-index:35;color:#9c9384;font-size:13px;font-weight:600}
+
+  /* layouts */
+  .center{justify-content:center}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;flex:1}
+  .two.wider-left{grid-template-columns:1.25fr .75fr}
+  .two.wider-right{grid-template-columns:.8fr 1.2fr}
+  .fill-img{flex:1;display:flex;align-items:center;justify-content:center;margin-top:18px;min-height:0}
+  .fill-img img{max-height:100%;max-width:100%;border-radius:14px;border:1px solid var(--line);box-shadow:0 24px 60px -30px rgba(0,0,0,.5)}
+  .shot{border-radius:14px;border:1px solid var(--line);box-shadow:0 24px 60px -30px rgba(0,0,0,.5);max-width:100%;max-height:62vh}
+
+  ul.big{list-style:none;margin-top:18px;display:flex;flex-direction:column;gap:14px}
+  ul.big li{font-size:21px;color:var(--soft);display:flex;gap:14px;align-items:flex-start;line-height:1.4}
+  ul.big li .b{flex:none;width:30px;height:30px;border-radius:9px;background:#f0e2d6;color:var(--clayd);
+    display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:700;font-size:15px;margin-top:2px}
+  ul.big li b{color:var(--ink)}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:26px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}
+  .stat .v{font-family:'Fraunces',serif;font-size:52px;font-weight:700;color:var(--clayd);line-height:1}
+  .stat .l{font-size:15px;color:var(--grey);margin-top:8px;font-weight:600}
+
+  .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .pill{background:#fff;border:1px solid var(--line);border-radius:99px;padding:9px 18px;font-size:16px;font-weight:600;color:var(--soft)}
+  .pill.clay{background:var(--clay);color:#fff;border-color:var(--clay)}
+  .pill.sage{background:var(--sage);color:#fff;border-color:var(--sage)}
+
+  table{width:100%;border-collapse:collapse;margin-top:18px;font-size:18px}
+  th{background:var(--ink);color:var(--cream);text-align:left;padding:13px 16px;font-weight:600;font-size:16px}
+  td{padding:13px 16px;border-bottom:1px solid var(--line);color:var(--soft);vertical-align:top}
+  tbody tr:nth-child(even){background:var(--cream)}
+  td b{color:var(--ink)}
+
+  .arrow{color:var(--clay);font-weight:800}
+
+  /* cover */
+  .cover{background:radial-gradient(120% 120% at 100% 0%,#2a2620,#121009);color:var(--cream);justify-content:space-between}
+  .cover::before{background:radial-gradient(55% 50% at 85% 15%,rgba(194,96,63,.35),transparent 60%),
+                            radial-gradient(45% 40% at 12% 95%,rgba(124,138,107,.28),transparent 60%);}
+  .cover h1{color:#fff;font-size:78px}
+  .cover h1 em{font-style:italic;color:var(--clayl)}
+  .cover .brand-lg{font-family:'Fraunces',serif;font-weight:800;font-size:30px;display:flex;align-items:center;gap:12px;color:#fff}
+  .cover .brand-lg .d{width:13px;height:13px;border-radius:50%;background:var(--clay)}
+  .cover .sub{font-size:23px;color:#cdc4b6;margin-top:18px;max-width:54ch;line-height:1.5}
+  .cover .meta{display:flex;gap:40px;flex-wrap:wrap;font-size:16px;color:#9c9384}
+  .cover .meta b{color:#fff;display:block;font-size:18px;font-weight:600;margin-bottom:2px}
+  .cover .kicker{color:var(--clayl)}
+
+  /* dark closing */
+  .dark{background:radial-gradient(120% 120% at 0% 100%,#2a2620,#121009);color:var(--cream);justify-content:center}
+  .dark::before{background:radial-gradient(50% 50% at 80% 20%,rgba(194,96,63,.3),transparent 60%)}
+  .dark h1,.dark h2{color:#fff} .dark h2 em{color:var(--clayl)}
+  .dark p{color:#cdc4b6}
+  .dark .refs{margin-top:24px;font-size:14.5px;color:#9c9384;line-height:1.7;max-width:80ch}
+  .dark .refs b{color:#cabfae}
+
+  .note{font-size:15px;color:var(--grey);margin-top:14px;font-style:italic}
+  .hint{position:fixed;bottom:54px;left:22px;z-index:35;color:#6f665a;font-size:12.5px}
+  .caption{font-size:14px;color:var(--grey);font-style:italic;text-align:center;margin-top:10px}
+
+  @media (max-width:900px){
+    .slide{padding:34px 30px}.two{grid-template-columns:1fr;gap:20px}
+    h1{font-size:40px}.cover h1{font-size:46px}h2{font-size:30px}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 · CAPA -->
+  <section class="slide cover active">
+    <div>
+      <div class="brand-lg"><span class="d"></span>Stylo</div>
+    </div>
+    <div>
+      <div class="kicker"><span class="dot"></span>Projeto Final · Interface Humano-Computador</div>
+      <h1>Avaliação da<br>usabilidade do <em>Stylo</em></h1>
+      <p class="sub">Como medimos, interpretamos e redesenhamos a experiência de um SaaS de gestão e agendamento para o setor de estética.</p>
+    </div>
+    <div class="meta">
+      <div><b>Dupla</b>Arthur Faria Estrela · Sávio Issa de Sousa</div>
+      <div><b>Disciplina</b>IHC — Prof.ª Cristiane de F. dos Santos Cardoso</div>
+      <div><b>Instituição</b>IF Goiano – Campus Urutaí · 7º Período</div>
+    </div>
+  </section>
+
+  <!-- 2 · O PRODUTO -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>1 · O produto</div>
+    <h2>O que é o <em>Stylo</em></h2>
+    <p class="lead">Plataforma <b>SaaS de gestão e agendamento</b> para barbearias, salões e clínicas de estética — substituindo a agenda manual por uma solução digital centralizada.</p>
+    <div class="two" style="margin-top:8px">
+      <ul class="big">
+        <li><span class="b">A</span><span>Página <b>pública de agendamento</b> para o cliente final</span></li>
+        <li><span class="b">B</span><span><b>Agendamento inteligente</b> anti-conflito de horários</span></li>
+        <li><span class="b">C</span><span>Painel de gestão: clientes, equipe, serviços, disponibilidade</span></li>
+        <li><span class="b">D</span><span>Métricas de <b>faturamento projetado</b> + integração WhatsApp</span></li>
+      </ul>
+      <div>
+        <div class="pillrow" style="margin-bottom:18px">
+          <span class="pill clay">Dois perfis de usuário</span>
+        </div>
+        <ul class="big">
+          <li><span class="b">1</span><span><b>Profissionais e gestores</b> de estética (painel)</span></li>
+          <li><span class="b">2</span><span><b>Clientes finais</b> agendando pelo celular (página pública)</span></li>
+        </ul>
+        <p class="note">Contextos: no balcão durante a rotina, em mobilidade e no agendamento à distância — sem treinamento.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · DECIDE -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>2 · Framework DECIDE</div>
+    <h2>Planejamos a avaliação com o <em>DECIDE</em></h2>
+    <p class="lead">Framework de Preece, Rogers &amp; Sharp para conduzir avaliações de forma sistemática.</p>
+    <table>
+      <thead><tr><th>Etapa</th><th>O que definimos para o Stylo</th></tr></thead>
+      <tbody>
+        <tr><td><b>D</b>eterminar objetivos</td><td>Facilidade de uso, eficiência e satisfação nas funções principais</td></tr>
+        <tr><td><b>E</b>xplorar perguntas</td><td>Concluem o fluxo sozinhos? A navegação é intuitiva? Entendem a terminologia?</td></tr>
+        <tr><td><b>C</b>hoose — métodos</td><td>Think-Aloud · SUS · Entrevista semiestruturada</td></tr>
+        <tr><td><b>I</b>dentificar prática</td><td>6 participantes do público-alvo · ambiente híbrido e de homologação</td></tr>
+        <tr><td><b>D</b>ecidir ética</td><td>Termo de consentimento · anonimato · direito de interromper</td></tr>
+        <tr><td><b>E</b>valuate</td><td>Codificação, tabulação, SUS e triangulação com a heurística</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 4 · MÉTODOS -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>2 · Métodos escolhidos</div>
+    <h2>Três técnicas <em>complementares</em></h2>
+    <div class="cards" style="grid-template-columns:repeat(3,1fr);margin-top:34px">
+      <div class="stat"><div class="v" style="font-size:34px">Think-Aloud</div><div class="l" style="margin-top:14px;font-size:17px;color:var(--soft)">Desempenho real e modelos mentais — o usuário verbaliza o raciocínio durante as tarefas.</div></div>
+      <div class="stat"><div class="v" style="font-size:34px">SUS</div><div class="l" style="margin-top:14px;font-size:17px;color:var(--soft)">Medida quantitativa padronizada: 10 afirmações → nota de 0 a 100.</div></div>
+      <div class="stat"><div class="v" style="font-size:34px">Entrevista</div><div class="l" style="margin-top:14px;font-size:17px;color:var(--soft)">Perguntas abertas pós-teste para capturar preferências e frustrações.</div></div>
+    </div>
+    <p class="note" style="margin-top:30px">Quantitativo + qualitativo: medimos a usabilidade <b>e</b> entendemos o porquê.</p>
+  </section>
+
+  <!-- 5 · HEURÍSTICA -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>3 · Avaliação heurística</div>
+    <h2>10 heurísticas de <em>Nielsen</em></h2>
+    <div class="two wider-right">
+      <div>
+        <ul class="big">
+          <li><span class="b">3</span><span><b>Controle e liberdade:</b> faltava “Esqueci minha senha”</span></li>
+          <li><span class="b">6</span><span><b>Reconhecimento:</b> calendário sem indicador de vaga</span></li>
+          <li><span class="b">5</span><span><b>Prevenção de erros:</b> botão ativo com campo inválido</span></li>
+          <li><span class="b">1</span><span><b>Visibilidade:</b> falhas sem feedback imediato</span></li>
+        </ul>
+        <p class="note">14 problemas catalogados nas telas críticas.</p>
+      </div>
+      <div class="fill-img"><img class="shot" src="assets/grafico_problemas.png" alt="Problemas por severidade"></div>
+    </div>
+  </section>
+
+  <!-- 6 · EXPERIMENTO -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>4 · Experimento</div>
+    <h2>Planejamento, piloto e <em>execução</em></h2>
+    <div class="two">
+      <ul class="big">
+        <li><span class="b">✓</span><span><b>6 participantes</b> do setor de estética (iniciante → avançado)</span></li>
+        <li><span class="b">✓</span><span>Formato <b>híbrido</b>: presencial + remoto com gravação de tela</span></li>
+        <li><span class="b">✓</span><span><b>8 tarefas</b> no painel + sessão Think-Aloud no fluxo público</span></li>
+        <li><span class="b">✓</span><span>Encerramento com <b>SUS</b> + entrevista</span></li>
+      </ul>
+      <div>
+        <div class="stat" style="background:#FBF3EC;border-color:#ecd8c8">
+          <div class="l" style="margin:0 0 8px;color:var(--clayd);font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:.1em">Teste piloto</div>
+          <p style="font-size:18px">Duração de <b>23 min</b> (tempo adequado). Revelou a hesitação para achar o menu de equipe e a falta de variação nos gráficos — ajustados antes do teste real.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · RESULTADOS: tarefas -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>5 · Resultados</div>
+    <h2>Desempenho nas <em>tarefas</em></h2>
+    <div class="two">
+      <div class="fill-img"><img class="shot" src="assets/grafico_conclusao.png" alt="Conclusão por tarefa"></div>
+      <div class="fill-img"><img class="shot" src="assets/grafico_tempo.png" alt="Tempo por tarefa"></div>
+    </div>
+    <p class="note" style="text-align:center">Nenhuma tarefa ficou incompleta. <b>T2 (adicionar profissional)</b> e <b>T4 (disponibilidade)</b> concentraram o atrito.</p>
+  </section>
+
+  <!-- 8 · RESULTADOS: SUS -->
+  <section class="slide center">
+    <div class="kicker"><span class="dot"></span>5 · Resultados · Satisfação</div>
+    <div class="two">
+      <div>
+        <h2>SUS = <em>78,3</em></h2>
+        <p class="lead">Classificação <b>“Bom”</b>, próxima ao limiar de “Excelente” (~80,3) e acima da média de mercado (~68).</p>
+        <div class="pillrow">
+          <span class="pill sage">Percentil ~80</span>
+          <span class="pill">Nota B+</span>
+        </div>
+      </div>
+      <div class="fill-img"><img class="shot" src="assets/grafico_sus.png" alt="Medidor SUS" style="max-height:54vh"></div>
+    </div>
+  </section>
+
+  <!-- 9 · THINK-ALOUD -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>5 · Think-Aloud · Fluxo público</div>
+    <h2>O que o cliente <em>verbalizou</em></h2>
+    <table>
+      <thead><tr><th>Verbalização</th><th>Código</th><th>Interpretação</th></tr></thead>
+      <tbody>
+        <tr><td>“Preço com fonte pequena e baixo contraste.”</td><td><b>UP 1.6</b></td><td>Dificuldade de leitura</td></tr>
+        <tr><td>“Fiquei na dúvida se o horário estava bloqueado.”</td><td><b>UP 2.2</b></td><td>Incerteza de conteúdo</td></tr>
+        <tr><td>“Cliquei em confirmar e fui jogado pro login.”</td><td><b>UP 1.3</b></td><td>Surpresa com a ação</td></tr>
+        <tr><td>“Voltei à confirmação com tudo preenchido.”</td><td>—</td><td>Persistência dos dados ✓</td></tr>
+      </tbody>
+    </table>
+    <p class="note">A plataforma <b>salvou as escolhas em background</b> — evitou o problema crítico de perda de dados.</p>
+  </section>
+
+  <!-- 10 · DISCUSSÃO -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>6 · Discussão</div>
+    <h2>Forte no núcleo, <em>atrito</em> nas bordas</h2>
+    <div class="two">
+      <div>
+        <div class="pillrow" style="margin-bottom:14px"><span class="pill sage">Pontos fortes</span></div>
+        <ul class="big">
+          <li><span class="b">★</span><span><b>Agendamento inteligente</b> — elogio unânime</span></li>
+          <li><span class="b">★</span><span><b>Estado preservado</b> mesmo após o redirecionamento</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="pillrow" style="margin-bottom:14px"><span class="pill clay">Problemas prioritários</span></div>
+        <ul class="big">
+          <li><span class="b">1</span><span>Equipe escondida em Configurações (T2)</span></li>
+          <li><span class="b">2</span><span>Redirecionamento sem aviso (UP 1.3)</span></li>
+          <li><span class="b">3</span><span>Calendário sem indicador de vaga</span></li>
+          <li><span class="b">4</span><span>Contraste de preços e alvos pequenos</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · MELHORIAS -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>7 · Proposta de melhorias</div>
+    <h2>Problema <span class="arrow">→</span> <em>solução</em></h2>
+    <table>
+      <thead><tr><th>Problema observado</th><th>Melhoria no protótipo</th></tr></thead>
+      <tbody>
+        <tr><td>“Equipe” escondida em Configurações</td><td><b>Item de 1º nível</b> + “+ Adicionar profissional”</td></tr>
+        <tr><td>Preço com baixo contraste</td><td><b>Fonte display maior</b> e cor escura</td></tr>
+        <tr><td>Redirecionamento abrupto p/ login</td><td><b>Modal de aviso</b> garantindo dados salvos</td></tr>
+        <tr><td>Calendário sem indicadores</td><td><b>Pontos de vaga</b> + “Próximo horário livre”</td></tr>
+        <tr><td>Sem recuperação de senha</td><td>Link <b>“Esqueci minha senha”</b> + tela dedicada</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 12 · PROTÓTIPO equipe -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>7 · Protótipo navegável</div>
+    <h2>Gestão de <em>equipe</em> redesenhada</h2>
+    <div class="fill-img"><img class="shot" src="assets/proto_team.png" alt="Protótipo equipe" style="max-height:64vh"></div>
+    <p class="caption">“Equipe” como item de primeiro nível e ação primária em destaque — resolve o maior atrito (T2).</p>
+  </section>
+
+  <!-- 13 · PROTÓTIPO calendário -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>7 · Protótipo navegável</div>
+    <h2>Calendário que <em>mostra a vaga</em></h2>
+    <div class="fill-img"><img class="shot" src="assets/proto_calendar.png" alt="Protótipo calendário" style="max-height:64vh"></div>
+    <p class="caption">Indicadores de disponibilidade + atalho “Próximo horário livre” (heurísticas 6 e 7).</p>
+  </section>
+
+  <!-- 14 · TESTE DO PROTÓTIPO -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>7 · Validação do protótipo</div>
+    <h2>Antes <span class="arrow">×</span> <em>depois</em></h2>
+    <div class="two wider-right">
+      <div>
+        <div class="cards" style="grid-template-columns:1fr;gap:14px">
+          <div class="stat"><div class="v">110s→22s</div><div class="l">Localizar “Equipe”</div></div>
+          <div class="stat"><div class="v">40s→8s</div><div class="l">Achar dia com vaga</div></div>
+        </div>
+      </div>
+      <div class="fill-img"><img class="shot" src="assets/grafico_prototipo.png" alt="Teste do protótipo" style="max-height:58vh"></div>
+    </div>
+    <p class="note" style="text-align:center">Teste rápido com 3 usuários: ninguém foi surpreendido pelo login e a leitura de preço deixou de ser citada.</p>
+  </section>
+
+  <!-- 15 · CONCLUSÃO -->
+  <section class="slide">
+    <div class="kicker"><span class="dot"></span>8 · Conclusão</div>
+    <h2>De <em>“Bom”</em> para “Excelente”</h2>
+    <div class="cards">
+      <div class="stat"><div class="v">78,3</div><div class="l">SUS — base sólida</div></div>
+      <div class="stat"><div class="v">0</div><div class="l">tarefas não concluídas</div></div>
+      <div class="stat"><div class="v">6</div><div class="l">melhorias de baixo custo</div></div>
+    </div>
+    <p class="lead" style="margin-top:30px">Ajustes <b>incrementais</b> — menu, contraste, modais e indicadores visuais — têm potencial de elevar a usabilidade do Stylo, reforçando o valor do design centrado no usuário.</p>
+  </section>
+
+  <!-- 16 · ENCERRAMENTO -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="dot"></span>Obrigado</div>
+    <h2>Perguntas? <em>Vamos conversar.</em></h2>
+    <p class="lead" style="color:#cdc4b6;margin-top:8px">Arthur Faria Estrela &amp; Sávio Issa de Sousa · IHC · IF Goiano – Campus Urutaí</p>
+    <div class="refs">
+      <b>Referências:</b> PREECE, ROGERS &amp; SHARP. <i>Design da interação</i> (2005) ·
+      MEMÓRIA, F. <i>Design para a internet</i> (2005) ·
+      BARBOSA &amp; SILVA. <i>Interação humano-computador</i> (2010) ·
+      NIELSEN, J. <i>10 Usability Heuristics</i> (1994) ·
+      BROOKE, J. <i>SUS</i> (1996).
+    </div>
+  </section>
+
+</div>
+
+<div class="counter" id="counter">1 / 16</div>
+<div class="pager">
+  <button id="prev">‹</button>
+  <button id="next">›</button>
+</div>
+<div class="chrome">
+  <span class="brand"><span class="d"></span>Stylo</span>
+  <span>Avaliação de Usabilidade · IHC</span>
+  <span class="who">← → navegar · F tela cheia</span>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  const counter=document.getElementById('counter');
+  const progress=document.getElementById('progress');
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    counter.textContent=`${i+1} / ${slides.length}`;
+    progress.style.width=((i+1)/slides.length*100)+'%';
+  }
+  function next(){show(i+1)} function prev(){show(i-1)}
+  document.getElementById('next').onclick=next;
+  document.getElementById('prev').onclick=prev;
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next()}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}
+    else if(e.key==='Home'){show(0)} else if(e.key==='End'){show(slides.length-1)}
+    else if(e.key.toLowerCase()==='f'){
+      if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  // navegação por clique (metade direita avança, esquerda volta)
+  document.getElementById('deck').addEventListener('click',e=>{
+    if(e.target.closest('.pager')) return;
+    (e.clientX > window.innerWidth*0.5) ? next() : prev();
+  });
+  show(0);
+</script>
+</body>
+</html>
